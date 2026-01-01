@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct IpsumTheme : Codable, Identifiable {
+struct IpsumTheme : Codable, Identifiable, Hashable {
     let id: String
     let name: String
     let paragraphs: [String]
