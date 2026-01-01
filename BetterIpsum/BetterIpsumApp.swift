@@ -10,8 +10,10 @@ import SwiftUI
 @main
 struct BetterIpsumApp: App {
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        MenuBarExtra("BetterIpsum", systemImage: "text.quote") {
+            MainPopoverView()
+                .frame(width: 300)
         }
+        .menuBarExtraStyle(.window)
     }
 }
