@@ -8,6 +8,7 @@
 import SwiftUI
 import AppKit
 import Foundation
+import ServiceManagement
 
 /// The main logic engine for BetterIpsum.
 /// Handles theme data loading, clipboard integration, and stubs for Apple Intelligence.
@@ -40,7 +41,26 @@ class IpsumGeneratorService {
         }
         return false
     }
-
+    
+    var launchAtLoginEnabled: Bool {
+        get {
+            return SMAppService.mainApp.status == .enabled  // No init needed!
+        }
+        set {
+            do {
+                if newValue {
+                    // Registers the main app bundle for launch at login
+                    try SMAppService.mainApp.register()
+                } else {
+                    // Removes it from the login items list
+                    try SMAppService.mainApp.unregister()
+                }
+            } catch {
+                print("SMAppService error: \(error.localizedDescription)")
+            }
+        }
+    }
+    
     // MARK: - Initializer
     
     init() {
