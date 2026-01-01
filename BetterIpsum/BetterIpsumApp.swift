@@ -9,11 +9,15 @@ import SwiftUI
 
 @main
 struct BetterIpsumApp: App {
+    
+    @State private var generator = IpsumGeneratorService()
+    
     var body: some Scene {
-        MenuBarExtra("BetterIpsum", systemImage: "text.quote") {
-            MainPopoverView()
-                .frame(width: 300)
+            MenuBarExtra("BetterIpsum", systemImage: "text.quote") {
+                MainPopoverView()
+                    .environment(generator) // Use modern environment injection
+                    .frame(width: 300)
+            }
+            .menuBarExtraStyle(.window)
         }
-        .menuBarExtraStyle(.window)
-    }
 }

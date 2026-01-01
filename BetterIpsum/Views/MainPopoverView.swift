@@ -8,20 +8,22 @@
 import SwiftUI
 
 struct MainPopoverView: View {
+    
+    @Environment(IpsumGeneratorService.self) private var generator
+    
     var body: some View {
         VStack(spacing: 0) {
-            // Header / Content
             VStack(alignment: .leading, spacing: 16) {
                 IpsumBarView(label: "Words", segmentCount: 5) { count in
-                    print("Copying \(count) words...")
+                    generator.copyToClipboard(count: count * 5, unit: "Words")
                 }
                 
                 IpsumBarView(label: "Sentences", segmentCount: 5) { count in
-                    print("Copying \(count) sentences...")
+                    generator.copyToClipboard(count: count, unit: "Sentences")
                 }
                 
                 IpsumBarView(label: "Paragraphs", segmentCount: 5) { count in
-                    print("Copying \(count) paragraphs...")
+                    generator.copyToClipboard(count: count, unit: "Paragraphs")
                 }
             }
             .padding(20)
