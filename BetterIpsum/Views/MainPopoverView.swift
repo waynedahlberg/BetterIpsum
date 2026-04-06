@@ -264,3 +264,10 @@ struct ParagraphSection: View {
         .frame(height: 108) // (4 rows * 24 height) + (3 gaps * 4 spacing)
     }
 }
+
+
+#Preview {
+    MainPopoverView()
+        .environment(IpsumGeneratorService())
+        .frame(width: 300)
+}
