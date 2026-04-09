@@ -2,9 +2,9 @@
 
 A macOS menu bar app for generating placeholder text — words, sentences, or paragraphs — across themed content categories. Click the menu bar icon, hover to choose an amount, click to copy.
 
-<p align="center">
-  <img src="screenshots/static.jpg" alt="BetterIpsum" width="318">
-</p>
+ 
+
+![BetterIpsum](screenshots/static.png)
 
 ## Features
 
@@ -17,9 +17,11 @@ A macOS menu bar app for generating placeholder text — words, sentences, or pa
 
 ## Screenshots
 
-| Idle | Words | Sentences | Paragraphs |
-|------|-------|-----------|------------|
-| ![Idle](screenshots/static.jpg) | ![Words](screenshots/hover-words.jpg) | ![Sentences](screenshots/hover-sentences.jpg) | ![Paragraphs](screenshots/hover-paragraphs.jpg) |
+
+| Words                                 | Sentences                                     | Paragraphs                                      |
+| ------------------------------------- | --------------------------------------------- | ----------------------------------------------- |
+| ![Words](screenshots/hover-words.jpg) | ![Sentences](screenshots/hover-sentences.jpg) | ![Paragraphs](screenshots/hover-paragraphs.jpg) |
+
 
 ## Requirements
 
@@ -84,9 +86,9 @@ Add your entry to the `themes` array and rebuild — no code changes required.
 
 ## Architecture
 
-- **`@Observable` + `MenuBarExtra`** — SwiftUI throughout, targeting macOS 15.6+
-- **`IpsumGeneratorService`** — single `@Observable` class injected via `.environment()`, owns all state
-- **`SMAppService`** — launch at login via `ServiceManagement`, no helper bundle required
+- `**@Observable` + `MenuBarExtra**` — SwiftUI throughout, targeting macOS 15.6+
+- `**IpsumGeneratorService**` — single `@Observable` class injected via `.environment()`, owns all state
+- `**SMAppService**` — launch at login via `ServiceManagement`, no helper bundle required
 - **No SPM packages** — zero external dependencies
 
 ## Contributing
