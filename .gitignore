@@ -15,6 +15,9 @@ build/
 # Claude Code
 .claude/
 
+# Local reference docs
+RELEASE_NOTES.md
+
 # Python
 __pycache__/
 *.pyc
