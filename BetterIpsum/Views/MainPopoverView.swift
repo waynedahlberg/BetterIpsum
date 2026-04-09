@@ -9,265 +9,370 @@ import SwiftUI
 
 struct MainPopoverView: View {
     @Environment(IpsumGeneratorService.self) private var generator
-    
-    enum Screen {
-        case main
-        case preferences
+
+    enum Screen { case main, preferences }
+
+    enum ContentState: Equatable {
+        case idle
+        case hovering(section: String, count: Int)
+        case copied(section: String, count: Int)
+
+        var isCopied: Bool {
+            if case .copied = self { return true }
+            return false
+        }
+
+        var activeSection: String? {
+            switch self {
+            case .idle: return nil
+            case .hovering(let s, _), .copied(let s, _): return s
+            }
+        }
+
+        var activeCount: Int {
+            switch self {
+            case .idle: return 0
+            case .hovering(_, let c), .copied(_, let c): return c
+            }
+        }
     }
-    
+
     @State private var currentScreen: Screen = .main
-    @State private var hoverCount: Int = 0
-    @State private var hoverUnit: String = "Ipsum length"
-    
+    @State private var contentState: ContentState = .idle
+
     var body: some View {
         ZStack {
-            Group {
-                if currentScreen == .main {
-                    mainContent
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .leading),
-                            removal: .move(edge: .trailing)
-                        ))
-                        .zIndex(1)
-                } else {
-                    preferencesContent
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing),
-                            removal: .move(edge: .leading)
-                        ))
-                        .zIndex(2)
-                }
-            }
-            .animation(.default, value: currentScreen)
-            
-            // Copied! Toast Overlay
-            if currentScreen == .main && generator.showCopySuccess {
-                copyToastOverlay
+            if currentScreen == .main {
+                mainContent
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading),
+                        removal: .move(edge: .trailing)
+                    ))
+                    .zIndex(1)
+            } else {
+                preferencesContent
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal: .move(edge: .leading)
+                    ))
+                    .zIndex(2)
             }
         }
+        .animation(.default, value: currentScreen)
     }
-    
+
+    // MARK: - Main Content
+
     private var mainContent: some View {
         VStack(spacing: 0) {
-            // Header: Dynamic Action Label
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                // The Animated Integer
-                Text("\(hoverCount)")
-                    .font(.system(size: 18, weight: .bold, design: .rounded).monospacedDigit())
-                    .foregroundStyle(.primary)
-                    .contentTransition(.numericText()) // Optimizes for digit swapping
-                
-                // The Unit Label
-                Text(hoverUnit)
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
-            }
-            .animation(.spring(response: 0.3, dampingFraction: 0.8), value: hoverCount)
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            
-            Divider().padding(.top, 12).padding(.horizontal, 20)
-            
-            // Isolated Visual Length Sections
-            VStack(spacing: 12) {
-                // Section 1: Words (Small Dashes)
-                WordSection(hoverCount: $hoverCount, hoverUnit: $hoverUnit) { count in
-                                    generator.copyToClipboard(count: count, unit: "Words")
-                                }
-                                
-                                SentenceSection(hoverCount: $hoverCount, hoverUnit: $hoverUnit) { count in
-                                    generator.copyToClipboard(count: count, unit: "Sentences")
-                                }
-                                
-                                ParagraphSection(hoverCount: $hoverCount, hoverUnit: $hoverUnit) { count in
-                                    generator.copyToClipboard(count: count, unit: "Paragraphs")
-                                }
-            }
-            .padding(20)
-            
+            titleArea
             Divider()
-            
-            footerSection
+                .padding(.horizontal, 32)
+            sectionsArea
+            Divider()
+                .padding(.horizontal, 32)
+            footerArea
         }
     }
-    
-    private var footerSection: some View {
+
+    // MARK: - Title
+
+    private var titleArea: some View {
+        ZStack {
+            if case .idle = contentState {
+                Text("Choose placeholder length")
+                    .font(.system(size: 19, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.secondary)
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+            } else {
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Text("\(contentState.activeCount)")
+                        .font(.system(size: 19, weight: .bold, design: .rounded).monospacedDigit())
+                        .contentTransition(.numericText())
+                    Text(unitLabel + (contentState.isCopied ? " copied!" : ""))
+                        .font(.system(size: 19, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+                }
+                .transition(.opacity.combined(with: .scale(scale: 0.96)))
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 32)
+        .padding(.top, 32)
+        .padding(.bottom, 24)
+        .animation(.spring(response: 0.25, dampingFraction: 0.8), value: contentState)
+    }
+
+    private var unitLabel: String {
+        let count = contentState.activeCount
+        switch contentState.activeSection {
+        case "Words":      return count == 1 ? "word"      : "words"
+        case "Sentences":  return count == 1 ? "sentence"  : "sentences"
+        case "Paragraphs": return count == 1 ? "paragraph" : "paragraphs"
+        default:           return ""
+        }
+    }
+
+    // MARK: - Sections
+
+    private var sectionsArea: some View {
+        VStack(spacing: 24) {
+            WordSection(
+                contentState: contentState,
+                onHover: { handleHover(section: "Words", index: $0) },
+                onClick: { count in
+                    generator.copyToClipboard(count: count, unit: "Words")
+                    triggerCopied(section: "Words", count: count)
+                }
+            )
+
+            SentenceSection(
+                contentState: contentState,
+                onHover: { handleHover(section: "Sentences", index: $0) },
+                onClick: { count in
+                    generator.copyToClipboard(count: count, unit: "Sentences")
+                    triggerCopied(section: "Sentences", count: count)
+                }
+            )
+
+            ParagraphSection(
+                contentState: contentState,
+                onHover: { handleHover(section: "Paragraphs", index: $0) },
+                onClick: { count in
+                    generator.copyToClipboard(count: count, unit: "Paragraphs")
+                    triggerCopied(section: "Paragraphs", count: count)
+                }
+            )
+        }
+        .padding(.horizontal, 32)
+        .padding(.vertical, 24)
+    }
+
+    private func handleHover(section: String, index: Int?) {
+        guard !contentState.isCopied else { return }
+        if let index {
+            withAnimation(.spring(response: 0.15)) {
+                contentState = .hovering(section: section, count: index)
+            }
+        } else if case .hovering(let s, _) = contentState, s == section {
+            withAnimation(.spring(response: 0.15)) {
+                contentState = .idle
+            }
+        }
+    }
+
+    private func triggerCopied(section: String, count: Int) {
+        withAnimation(.spring(response: 0.2)) {
+            contentState = .copied(section: section, count: count)
+        }
+        Task {
+            try? await Task.sleep(for: .seconds(2.5))
+            await MainActor.run {
+                if case .copied = contentState {
+                    withAnimation(.spring(response: 0.3)) {
+                        contentState = .idle
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Footer
+
+    private var footerArea: some View {
         HStack {
-            Button("Preferences...") {
+            FooterIconButton(systemImage: "gearshape") {
                 withAnimation { currentScreen = .preferences }
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(.secondary)
-            .onHover { isHovering in
-                if isHovering { NSCursor.pointingHand.push() }
-                else { NSCursor.pop() }
-            }
-            
             Spacer()
-            
-            Button("Quit") {
+            FooterIconButton(systemImage: "power") {
                 NSApplication.shared.terminate(nil)
             }
-            .buttonStyle(.plain)
-            .fontWeight(.medium)
         }
-        .font(.system(.callout, design: .rounded))
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color.primary.opacity(0.03))
+        .padding(.horizontal, 32)
+        .padding(.top, 24)
+        .padding(.bottom, 32)
     }
-    
+
     private var preferencesContent: some View {
         PreferencesView(generator: generator) {
             withAnimation { currentScreen = .main }
         }
     }
-    
-    private var copyToastOverlay: some View {
-        VStack {
-            Spacer()
-            HStack(spacing: 6) {
-                Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-                Text("Copied to Clipboard")
-            }
-            .font(.system(.subheadline, design: .rounded).bold())
-            .padding(.horizontal, 16).padding(.vertical, 10)
-            .background(.ultraThinMaterial)
-            .clipShape(Capsule())
-            .overlay(Capsule().stroke(Color.primary.opacity(0.1), lineWidth: 0.5))
-            .shadow(color: .black.opacity(0.1), radius: 10, y: 5)
-            .transition(.asymmetric(insertion: .move(edge: .bottom).combined(with: .opacity), removal: .opacity))
-            .padding(.bottom, 60)
+}
+
+// MARK: - Footer Icon Button
+
+struct FooterIconButton: View {
+    let systemImage: String
+    let action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .font(.system(size: 16, weight: .regular))
+                .foregroundStyle(.secondary)
+                .frame(width: 24, height: 24)
+                .padding(8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(isHovered ? Color(white: 0.83) : .clear)
+                )
         }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
     }
 }
 
-// MARK: - Isolated Section Components
+// MARK: - Word Section
 
 struct WordSection: View {
-    @Binding var hoverCount: Int
-    @Binding var hoverUnit: String
-    let onSelect: (Int) -> Void
-    @State private var hoveredIndex: Int? = nil
+    let contentState: MainPopoverView.ContentState
+    let onHover: (Int?) -> Void
+    let onClick: (Int) -> Void
 
     var body: some View {
         GeometryReader { geo in
-            HStack(spacing: 4) {
+            HStack(spacing: 8) {
                 ForEach(1...5, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(hoveredIndex != nil && index <= hoveredIndex! ? Color.blue.opacity(0.6) : Color.gray.opacity(0.4))
+                    Capsule()
+                        .fill(capsuleColor(for: index))
                         .frame(height: 12)
+                        .animation(.spring(response: 0.15), value: contentState)
                 }
             }
             .contentShape(Rectangle())
             .onContinuousHover { phase in
                 switch phase {
                 case .active(let location):
-                    let itemWidth = geo.size.width / 5
-                    let index = Int(location.x / itemWidth) + 1
-                    let safeIndex = min(max(index, 1), 5)
-                    
-                    hoveredIndex = safeIndex
-                    hoverCount = safeIndex * 1 // Custom multiplier for words
-                    hoverUnit = safeIndex == 1 ? "Word" : "Words"
+                    let safeIndex = min(max(Int(location.x / (geo.size.width / 5)) + 1, 1), 5)
+                    onHover(safeIndex)
                 case .ended:
-                    hoveredIndex = nil
-                    hoverCount = 0
-                    hoverUnit = "Select length"
+                    onHover(nil)
                 }
             }
             .onTapGesture {
-                if let index = hoveredIndex { onSelect(index * 5) }
+                if case .hovering(let s, let c) = contentState, s == "Words" {
+                    onClick(c)
+                }
             }
         }
         .frame(height: 12)
     }
+
+    private func capsuleColor(for index: Int) -> Color {
+        switch contentState {
+        case .hovering(let s, let c) where s == "Words" && index <= c:
+            return .blue.opacity(0.65)
+        case .copied(let s, let c) where s == "Words" && index <= c:
+            return Color(white: 0.55)
+        default:
+            return Color(white: 0.91)
+        }
+    }
 }
+
+// MARK: - Sentence Section
 
 struct SentenceSection: View {
-    @Binding var hoverCount: Int
-    @Binding var hoverUnit: String
-    let onSelect: (Int) -> Void
-    @State private var hoveredIndex: Int? = nil
+    let contentState: MainPopoverView.ContentState
+    let onHover: (Int?) -> Void
+    let onClick: (Int) -> Void
 
     var body: some View {
         GeometryReader { geo in
-            VStack(spacing: 4) {
+            VStack(spacing: 8) {
                 ForEach(1...5, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(hoveredIndex != nil && index <= hoveredIndex! ? Color.blue.opacity(0.6) : Color.gray.opacity(0.4))
-                        .frame(maxWidth: .infinity)
+                    Capsule()
+                        .fill(capsuleColor(for: index))
+                        .frame(maxWidth: .infinity, minHeight: 12, maxHeight: 12)
+                        .animation(.spring(response: 0.15), value: contentState)
                 }
             }
-            .contentShape(Rectangle()) // Gapless hover
+            .contentShape(Rectangle())
             .onContinuousHover { phase in
                 switch phase {
                 case .active(let location):
-                    let rowHeight = geo.size.height / 5
-                    let index = Int(location.y / rowHeight) + 1
-                    let safeIndex = min(max(index, 1), 5)
-                    
-                    hoveredIndex = safeIndex
-                    hoverCount = safeIndex // Updates the monospaced digit
-                    hoverUnit = safeIndex == 1 ? "Sentence" : "Sentences"
+                    let safeIndex = min(max(Int(location.y / (geo.size.height / 5)) + 1, 1), 5)
+                    onHover(safeIndex)
                 case .ended:
-                    hoveredIndex = nil
-                    hoverCount = 0
-                    hoverUnit = "Select length"
+                    onHover(nil)
                 }
             }
             .onTapGesture {
-                if let index = hoveredIndex { onSelect(index) }
+                if case .hovering(let s, let c) = contentState, s == "Sentences" {
+                    onClick(c)
+                }
             }
         }
-        .frame(height: 56) // 5 rows @ 8pt + 4 gaps @ 4pt
+        .frame(height: 92) // 5 * 12 + 4 * 8
+    }
+
+    private func capsuleColor(for index: Int) -> Color {
+        switch contentState {
+        case .hovering(let s, let c) where s == "Sentences" && index <= c:
+            return .green.opacity(0.75)
+        case .copied(let s, let c) where s == "Sentences" && index <= c:
+            return Color(white: 0.55)
+        default:
+            return Color(white: 0.91)
+        }
     }
 }
+
+// MARK: - Paragraph Section
 
 struct ParagraphSection: View {
-    @Binding var hoverCount: Int
-    @Binding var hoverUnit: String
-    let onSelect: (Int) -> Void
-    @State private var hoveredIndex: Int? = nil
+    let contentState: MainPopoverView.ContentState
+    let onHover: (Int?) -> Void
+    let onClick: (Int) -> Void
 
     var body: some View {
         GeometryReader { geo in
-            VStack(spacing: 4) {
-                ForEach(1...4, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(hoveredIndex != nil && index <= hoveredIndex! ? Color.blue.opacity(0.6) : Color.gray.opacity(0.4))
-                        .frame(maxWidth: .infinity)
+            VStack(spacing: 8) {
+                ForEach(1...5, id: \.self) { index in
+                    Capsule()
+                        .fill(capsuleColor(for: index))
+                        .frame(maxWidth: .infinity, minHeight: 28, maxHeight: 28)
+                        .animation(.spring(response: 0.15), value: contentState)
                 }
             }
-            .contentShape(Rectangle()) // Capture hover over gaps
+            .contentShape(Rectangle())
             .onContinuousHover { phase in
                 switch phase {
                 case .active(let location):
-                    // Logic: total height / number of rows
-                    let rowHeight = geo.size.height / 4
-                    let index = Int(location.y / rowHeight) + 1
-                    let safeIndex = min(max(index, 1), 4)
-                    
-                    hoveredIndex = safeIndex
-                    hoverCount = safeIndex
-                    hoverUnit = safeIndex == 1 ? "Paragraph" : "Paragraphs"
+                    let safeIndex = min(max(Int(location.y / (geo.size.height / 5)) + 1, 1), 5)
+                    onHover(safeIndex)
                 case .ended:
-                    hoveredIndex = nil
-                    hoverCount = 0
-                    hoverUnit = "Select length"
+                    onHover(nil)
                 }
             }
             .onTapGesture {
-                if let index = hoveredIndex { onSelect(index) }
+                if case .hovering(let s, let c) = contentState, s == "Paragraphs" {
+                    onClick(c)
+                }
             }
         }
-        .frame(height: 108) // (4 rows * 24 height) + (3 gaps * 4 spacing)
+        .frame(height: 172) // 5 * 28 + 4 * 8
+    }
+
+    private func capsuleColor(for index: Int) -> Color {
+        switch contentState {
+        case .hovering(let s, let c) where s == "Paragraphs" && index <= c:
+            return Color(red: 1.0, green: 0.18, blue: 0.49).opacity(0.85)
+        case .copied(let s, let c) where s == "Paragraphs" && index <= c:
+            return Color(white: 0.55)
+        default:
+            return Color(white: 0.91)
+        }
     }
 }
 
+// MARK: - Previews
 
-#Preview {
+#Preview("Default") {
     MainPopoverView()
         .environment(IpsumGeneratorService())
-        .frame(width: 300)
+        .frame(width: 318)
 }

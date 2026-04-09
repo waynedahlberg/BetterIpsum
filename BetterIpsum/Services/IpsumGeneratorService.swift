@@ -22,9 +22,6 @@ class IpsumGeneratorService {
     /// The currently selected theme ID, used for the UI Picker
     var selectedThemeID: String = ""
     
-    /// Visual state to trigger the "Copied!" feedback in the UI
-    var showCopySuccess = false
-    
     /// AI Generation states
     var isGenerating = false
     var aiGeneratedText = ""
@@ -66,17 +63,18 @@ class IpsumGeneratorService {
     init() {
         loadThemesFromBundle()
     }
-
+    
     // MARK: - Data Loading
     
     /// Loads the unified 'themes.json' from the app bundle
     private func loadThemesFromBundle() {
-        guard let url = Bundle.main.url(forResource: "themes", withExtension: "json"),
+        let bundle = Bundle(for: IpsumGeneratorService.self) // not Bundle.main
+        guard let url = bundle.url(forResource: "themes", withExtension: "json"),
               let data = try? Data(contentsOf: url) else {
             print("Error: themes.json not found in bundle.")
             return
         }
-
+        
         do {
             let decoder = JSONDecoder()
             // Decodes the root key "themes" into the array of IpsumTheme
@@ -89,7 +87,7 @@ class IpsumGeneratorService {
             print("Decoding error: \(error)")
         }
     }
-
+    
     // MARK: - Clipboard Logic
     
     /// Processes and copies text to the system clipboard
@@ -100,14 +98,14 @@ class IpsumGeneratorService {
         guard let theme = selectedTheme, !theme.paragraphs.isEmpty else { return }
         
         let resultText: String
-
+        
         switch unit {
         case "Words":
             // Take a random paragraph and slice the required words
             let rawWords = theme.paragraphs.randomElement()?.components(separatedBy: .whitespacesAndNewlines) ?? []
             let cleanWords = rawWords.filter { !$0.isEmpty }
             resultText = cleanWords.prefix(count).joined(separator: " ")
-
+            
         case "Sentences":
             // Flatten paragraphs into sentences and pick random ones
             let allText = theme.paragraphs.joined(separator: " ")
@@ -116,39 +114,21 @@ class IpsumGeneratorService {
                 .filter { $0.count > 10 } // Ensure it's a substantial sentence
             
             resultText = sentences.shuffled().prefix(count).joined(separator: ". ") + "."
-
+            
         case "Paragraphs":
             // Select random whole paragraphs from the list
             resultText = theme.paragraphs.shuffled().prefix(count).joined(separator: "\n\n")
-
+            
         default:
             resultText = ""
         }
-
+        
         // Apply to NSPasteboard
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         pasteboard.setString(resultText, forType: .string)
-        
-        triggerFeedback()
     }
-
-    private func triggerFeedback() {
-        withAnimation(.spring(duration: 0.3)) {
-            showCopySuccess = true
-        }
-        
-        // Auto-dismiss the feedback after a short delay
-        Task {
-            try? await Task.sleep(for: .seconds(1.5))
-            await MainActor.run {
-                withAnimation {
-                    self.showCopySuccess = false
-                }
-            }
-        }
-    }
-
+    
     // MARK: - Future AI Stub
     
     /// Future implementation for macOS 26 (Tahoe)
@@ -162,4 +142,22 @@ class IpsumGeneratorService {
             self.isGenerating = false
         }
     }
+}
+
+/// Preview static factory for richer mock states
+/// Best practice - a `static var preview` on the service so we can test multiple states without building:
+extension IpsumGeneratorService {
+    static var preview: IpsumGeneratorService {
+        let service = IpsumGeneratorService()
+        // Override with hardcoded mock data so no bundle needed
+        service.themes = [
+            IpsumTheme(id: "lorem", name: "Lorem Ipsum", paragraphs: [
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.",
+                "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris."
+            ])
+        ]
+        service.selectedThemeID = "lorem"
+        return service
+    }
+    
 }

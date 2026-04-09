@@ -16,7 +16,7 @@ struct BetterIpsumApp: App {
             MenuBarExtra("BetterIpsum", systemImage: "text.quote") {
                 MainPopoverView()
                     .environment(generator) // Use modern environment injection
-                    .frame(width: 300)
+                    .frame(width: 318)
             }
             .menuBarExtraStyle(.window)
         }
