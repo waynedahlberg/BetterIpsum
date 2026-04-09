@@ -1,0 +1,47 @@
+# BetterIpsum — XcodeGen project definition
+# Run `xcodegen generate` to regenerate BetterIpsum.xcodeproj
+# Never edit the .xcodeproj directly — change this file and regenerate.
+
+name: BetterIpsum
+
+options:
+  bundleIdPrefix: com.waynedahlberg
+  deploymentTarget:
+    macOS: "15.6"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "15.6"
+
+targets:
+  BetterIpsum:
+    type: application
+    platform: macOS
+    deploymentTarget: "15.6"
+    sources:
+      - path: BetterIpsum
+        excludes:
+          - "**/.DS_Store"
+          - "BetterIpsum.icon/**"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.waynedahlberg.BetterIpsum
+        MARKETING_VERSION: "0.9.0"
+        CURRENT_PROJECT_VERSION: "1"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 6Y33CRE77K
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "Better Ipsum"
+        INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.utilities"
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
+      debug:
+        DEBUG_INFORMATION_FORMAT: dwarf
+      release:
+        DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+        COPY_PHASE_STRIP: NO

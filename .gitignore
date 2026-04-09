@@ -1,0 +1,20 @@
+# Generated Xcode project — never commit, regenerate with `xcodegen generate`
+*.xcodeproj
+*.xcworkspace
+
+# Xcode build artifacts
+DerivedData/
+xcuserdata/
+.build/
+build/
+
+# macOS
+.DS_Store
+.env
+
+# Claude Code
+.claude/
+
+# Python
+__pycache__/
+*.pyc
