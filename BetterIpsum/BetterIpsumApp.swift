@@ -13,10 +13,10 @@ struct BetterIpsumApp: App {
     @State private var generator = IpsumGeneratorService()
     
     var body: some Scene {
-            MenuBarExtra("BetterIpsum", systemImage: "text.quote") {
+            MenuBarExtra("BetterIpsum", image: "menubar-icon") {
                 MainPopoverView()
                     .environment(generator) // Use modern environment injection
-                    .frame(width: 318)
+                    .frame(width: 300)
             }
             .menuBarExtraStyle(.window)
         }

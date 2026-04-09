@@ -3,7 +3,16 @@
     "allow": [
       "mcp__plugin_figma_figma-desktop__get_design_context",
       "mcp__plugin_figma_figma-desktop__get_screenshot",
-      "mcp__plugin_figma_figma-desktop__get_metadata"
+      "mcp__plugin_figma_figma-desktop__get_metadata",
+      "Bash(curl -sL \"https://sosumi.ai/design/human-interface-guidelines/menu-bar-extras\")",
+      "Bash(curl -sL \"https://sosumi.ai/design/human-interface-guidelines/status-bars\")",
+      "Bash(curl -sL \"https://sosumi.ai/design/human-interface-guidelines/app-icons\")",
+      "Bash(curl -sL \"https://sosumi.ai/design/human-interface-guidelines/icons\")",
+      "Bash(curl -sL \"https://sosumi.ai/design/human-interface-guidelines/toolbars\")",
+      "Bash(curl -sL \"https://sosumi.ai/design/human-interface-guidelines/menu-bar\")",
+      "Bash(curl -sL \"https://sosumi.ai/design/human-interface-guidelines/the-menu-bar\")",
+      "Bash(curl -sL \"https://developer.apple.com/documentation/appkit/nsstatusitem\")",
+      "Bash(curl -sL \"https://sosumi.ai/documentation/appkit/nsstatusitem\")"
     ]
   }
 }

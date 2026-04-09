@@ -67,10 +67,10 @@ struct MainPopoverView: View {
         VStack(spacing: 0) {
             titleArea
             Divider()
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 16)
             sectionsArea
             Divider()
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 16)
             footerArea
         }
     }
@@ -98,8 +98,8 @@ struct MainPopoverView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 32)
-        .padding(.top, 32)
-        .padding(.bottom, 24)
+        .padding(.top, 16)
+        .padding(.bottom, 16)
         .animation(.spring(response: 0.25, dampingFraction: 0.8), value: contentState)
     }
 
@@ -116,7 +116,7 @@ struct MainPopoverView: View {
     // MARK: - Sections
 
     private var sectionsArea: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 16) {
             WordSection(
                 contentState: contentState,
                 onHover: { handleHover(section: "Words", index: $0) },
@@ -181,17 +181,17 @@ struct MainPopoverView: View {
 
     private var footerArea: some View {
         HStack {
-            FooterIconButton(systemImage: "gearshape") {
+            FooterIconButton(systemImage: "gearicon") {
                 withAnimation { currentScreen = .preferences }
             }
             Spacer()
-            FooterIconButton(systemImage: "power") {
+            FooterIconButton(systemImage: "powericon") {
                 NSApplication.shared.terminate(nil)
             }
         }
-        .padding(.horizontal, 32)
-        .padding(.top, 24)
-        .padding(.bottom, 32)
+        .padding(.horizontal, 8)
+        .padding(.top, 8)
+        .padding(.bottom, 8)
     }
 
     private var preferencesContent: some View {
@@ -210,14 +210,14 @@ struct FooterIconButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: systemImage)
+            Image("\(systemImage)")
                 .font(.system(size: 16, weight: .regular))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(isHovered ? Color.primary : Color.secondary.opacity(0.5))
                 .frame(width: 24, height: 24)
                 .padding(8)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(isHovered ? Color(white: 0.83) : .clear)
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(isHovered ? Color(.secondarySystemFill).opacity(0.5) : .clear)
                 )
         }
         .buttonStyle(.plain)
@@ -264,11 +264,11 @@ struct WordSection: View {
     private func capsuleColor(for index: Int) -> Color {
         switch contentState {
         case .hovering(let s, let c) where s == "Words" && index <= c:
-            return .blue.opacity(0.65)
+            return .blue.opacity(1.0)
         case .copied(let s, let c) where s == "Words" && index <= c:
-            return Color(white: 0.55)
+            return Color(.secondarySystemFill).opacity(0.75)
         default:
-            return Color(white: 0.91)
+            return Color(.secondaryLabelColor).opacity(0.25)
         }
     }
 }
@@ -312,11 +312,11 @@ struct SentenceSection: View {
     private func capsuleColor(for index: Int) -> Color {
         switch contentState {
         case .hovering(let s, let c) where s == "Sentences" && index <= c:
-            return .green.opacity(0.75)
+            return .green.opacity(1.0)
         case .copied(let s, let c) where s == "Sentences" && index <= c:
-            return Color(white: 0.55)
+            return Color(.secondarySystemFill).opacity(0.75)
         default:
-            return Color(white: 0.91)
+            return Color(.secondaryLabelColor).opacity(0.25)
         }
     }
 }
@@ -360,11 +360,11 @@ struct ParagraphSection: View {
     private func capsuleColor(for index: Int) -> Color {
         switch contentState {
         case .hovering(let s, let c) where s == "Paragraphs" && index <= c:
-            return Color(red: 1.0, green: 0.18, blue: 0.49).opacity(0.85)
+            return Color(red: 1.0, green: 0.18, blue: 0.49).opacity(1.0)
         case .copied(let s, let c) where s == "Paragraphs" && index <= c:
-            return Color(white: 0.55)
+            return Color(.secondarySystemFill).opacity(0.75)
         default:
-            return Color(white: 0.91)
+            return Color(.secondaryLabelColor).opacity(0.25)
         }
     }
 }
