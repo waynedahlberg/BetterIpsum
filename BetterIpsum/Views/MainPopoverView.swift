@@ -9,8 +9,7 @@ import SwiftUI
 
 struct MainPopoverView: View {
     @Environment(IpsumGeneratorService.self) private var generator
-
-    enum Screen { case main, preferences }
+    @Environment(\.openSettings) private var openSettings
 
     enum ContentState: Equatable {
         case idle
@@ -37,28 +36,10 @@ struct MainPopoverView: View {
         }
     }
 
-    @State private var currentScreen: Screen = .main
     @State private var contentState: ContentState = .idle
 
     var body: some View {
-        ZStack {
-            if currentScreen == .main {
-                mainContent
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .leading),
-                        removal: .move(edge: .trailing)
-                    ))
-                    .zIndex(1)
-            } else {
-                preferencesContent
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing),
-                        removal: .move(edge: .leading)
-                    ))
-                    .zIndex(2)
-            }
-        }
-        .animation(.default, value: currentScreen)
+        mainContent
     }
 
     // MARK: - Main Content
@@ -182,7 +163,8 @@ struct MainPopoverView: View {
     private var footerArea: some View {
         HStack {
             FooterIconButton(systemImage: "gearicon") {
-                withAnimation { currentScreen = .preferences }
+                NSApp.activate(ignoringOtherApps: true)
+                openSettings()
             }
             Spacer()
             FooterIconButton(systemImage: "powericon") {
@@ -192,12 +174,6 @@ struct MainPopoverView: View {
         .padding(.horizontal, 8)
         .padding(.top, 8)
         .padding(.bottom, 8)
-    }
-
-    private var preferencesContent: some View {
-        PreferencesView(generator: generator) {
-            withAnimation { currentScreen = .main }
-        }
     }
 }
 
