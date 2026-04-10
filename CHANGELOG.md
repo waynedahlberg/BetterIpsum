@@ -18,3 +18,12 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - Launch at login toggle via `SMAppService`
 - All content served locally from `themes.json` — no network requests
 - XcodeGen `project.yml` — `.xcodeproj` is never committed
+
+## [0.9.1] — 2026-04-10
+
+### Refactored
+- Settings View. Now a modal window presentation instead of 'push-pop' navigation stack
+
+### Cleaned
+- Removed unnecessary and unreferenced files
+- Removed unused early prototype views
