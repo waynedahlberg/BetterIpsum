@@ -7,6 +7,12 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.9.3] - 2026-04-13
+
+### Added
+- Dropdown menu to select placeholder text 'Theme'
+- Adjust overall width of the panel (smaller, 256pt)
+
 ## [0.9.0] — 2026-04-09
 
 ### Added

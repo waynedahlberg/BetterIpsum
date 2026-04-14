@@ -29,7 +29,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.waynedahlberg.BetterIpsum
-        MARKETING_VERSION: "0.9.2"
+        MARKETING_VERSION: "0.9.3"
         CURRENT_PROJECT_VERSION: "1"
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: 6Y33CRE77K
