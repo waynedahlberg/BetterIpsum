@@ -16,7 +16,7 @@ struct BetterIpsumApp: App {
         MenuBarExtra("BetterIpsum", image: "menubar-icon") {
             MainPopoverView()
                 .environment(generator)
-                .frame(width: 300)
+                .frame(width: 256)
         }
         .menuBarExtraStyle(.window)
 

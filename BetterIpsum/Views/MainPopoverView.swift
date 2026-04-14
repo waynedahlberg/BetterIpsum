@@ -48,10 +48,13 @@ struct MainPopoverView: View {
         VStack(spacing: 0) {
             titleArea
             Divider()
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 8)
+            themePickerArea
+            Divider()
+                .padding(.horizontal, 8)
             sectionsArea
             Divider()
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 8)
             footerArea
         }
     }
@@ -82,6 +85,29 @@ struct MainPopoverView: View {
         .padding(.top, 16)
         .padding(.bottom, 16)
         .animation(.spring(response: 0.25, dampingFraction: 0.8), value: contentState)
+    }
+
+    // MARK: - Theme Picker
+
+    private var themePickerArea: some View {
+        HStack {
+            Text("Theme")
+                .font(.system(.caption, design: .rounded).bold())
+                .foregroundStyle(.secondary)
+
+            Spacer()
+
+            Picker("", selection: Bindable(generator).selectedThemeID) {
+                ForEach(generator.themes) { theme in
+                    Text(theme.name).tag(theme.id)
+                }
+            }
+            .pickerStyle(.menu)
+            .labelsHidden()
+            .fixedSize()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
     }
 
     private var unitLabel: String {
@@ -125,7 +151,7 @@ struct MainPopoverView: View {
                 }
             )
         }
-        .padding(.horizontal, 32)
+        .padding(.horizontal, 16)
         .padding(.vertical, 24)
     }
 

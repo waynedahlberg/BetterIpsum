@@ -29,9 +29,10 @@ struct PreferencesView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 380)
+        .frame(width: 256)
         .onAppear {
             isLoginEnabled = generator.launchAtLoginEnabled
         }
     }
 }
+
